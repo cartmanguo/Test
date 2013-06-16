@@ -7,13 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MusicLoader.h"
 
-@class ViewController;
+@class RootViewController;
+@class OnlineMusicViewController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
-@property (strong, nonatomic) ViewController *viewController;
-
+@property (strong, nonatomic) RootViewController *viewController;
+@property (strong, nonatomic) OnlineMusicViewController *onlineMusicController;
+@property (strong, nonatomic) UITabBarController *tabBarController;
+@property (strong, nonatomic) UINavigationController *navController;
+@property (strong, nonatomic) UINavigationController *secondNavController;
 @end

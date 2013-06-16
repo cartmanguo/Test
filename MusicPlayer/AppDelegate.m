@@ -8,19 +8,76 @@
 
 #import "AppDelegate.h"
 
-#import "ViewController.h"
-
+#import "RootViewController.h"
+#import "OnlineMusicViewController.h"
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    UIImage *localMusicIcon = [UIImage imageNamed:@"headphone.png"];
+    UIImage *netMusicIcon = [UIImage imageNamed:@"display.png"];
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    self.viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
-    self.window.rootViewController = self.viewController;
+    self.viewController = [[RootViewController alloc] initWithNibName:@"ViewController" bundle:nil];
+    self.onlineMusicController = [[OnlineMusicViewController alloc] initWithStyle:UITableViewStylePlain];
+    self.onlineMusicController.tabBarItem = [[UITabBarItem alloc]
+                                             initWithTitle:@"在线音乐"
+                                             image:netMusicIcon
+                                             tag:102];
+    self.viewController.tabBarItem = [[UITabBarItem alloc]
+                                      initWithTitle:@"本地音乐"
+                                      image:localMusicIcon
+                                      tag:101];
+    self.navController = [[UINavigationController alloc] initWithRootViewController:self.viewController];
+    self.secondNavController = [[UINavigationController alloc] initWithRootViewController:self.onlineMusicController];
+    self.tabBarController = [[UITabBarController alloc] init];
+    self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.navController,self.secondNavController, nil];
+    self.window.rootViewController = self.tabBarController;
+    
+    //load infomation of music
+    MusicLoader *musicLoader = [[MusicLoader alloc] init];
+    [musicLoader loadMusicByAlbum];
+    [musicLoader loadMusicByArtist];
+    [musicLoader loadMusicByTitle];
+
     [self.window makeKeyAndVisible];
+    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     return YES;
 }
+
+- (void) remoteControlReceivedWithEvent: (UIEvent *) receivedEvent
+{
+    UIImage *playBtnImage = [UIImage imageNamed:@"play"];
+    UIImage *pauseBtnImage = [UIImage imageNamed:@"pause"];
+    if (receivedEvent.type == UIEventTypeRemoteControl)
+    {
+        switch (receivedEvent.subtype) {
+                
+            case UIEventSubtypeRemoteControlTogglePlayPause:
+                if(self.viewController.allMuiscViewController.musicPlayer.rate)
+                {
+                    [self.viewController.allMuiscViewController.musicPlayer pause];
+                    [self.viewController.allMuiscViewController.nowPlayingViewController.playBtn setBackgroundImage:playBtnImage forState:UIControlStateNormal];
+                }
+                else
+                {
+                    [self.viewController.allMuiscViewController.musicPlayer play];
+                    [self.viewController.allMuiscViewController.nowPlayingViewController.playBtn setBackgroundImage:pauseBtnImage forState:UIControlStateNormal];
+                }
+                break;
+                
+            case UIEventSubtypeRemoteControlPreviousTrack:
+                break;
+                
+            case UIEventSubtypeRemoteControlNextTrack:
+                break;
+                
+            default:
+                break;
+        }
+    }
+}
+
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
